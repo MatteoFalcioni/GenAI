@@ -46,10 +46,11 @@ def model_call(state : AgentState) -> AgentState:
     """Call the llm to respond to a given request."""
     # system message
     system_prompt = SystemMessage(content=
-                                  "You are an helpful AI assitant, please answer my query to the best of your ability.")
+                                  "You are an helpful AI assistant, please answer my query to the best of your ability.")
     
-    # another (more compact way) to update the state, thanks to add_messages:
     response = model.invoke([system_prompt] + state['messages'])
+
+    # another (more compact way) to update the state, thanks to add_messages:
     return {"messages": [response]}
 
 
