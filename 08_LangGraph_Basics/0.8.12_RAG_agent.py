@@ -48,7 +48,7 @@ text_splitter = RecursiveCharacterTextSplitter(
 
 pages_split = text_splitter.split_documents(pages) # We now apply this to our pages
 
-persist_directory = r"../08_LangGraph"
+persist_directory = r"../08_LangGraph_Basics"
 collection_name = "stock_market"
 
 # If our collection does not exist in the directory, we create using the os command
