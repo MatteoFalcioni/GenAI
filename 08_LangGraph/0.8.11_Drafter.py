@@ -123,8 +123,8 @@ graph.add_edge(START, "agent")
 graph.add_edge("agent", "tools")
 graph.add_edge("tools", "agent")
 graph.add_conditional_edges(source="tools",
-                            path_map=should_continue,
-                            path={
+                            path=should_continue,
+                            path_map={
                                 "continue" : "agent",
                                 "end" : END
                             })
@@ -144,3 +144,89 @@ def run_document_agent():
 
 if __name__ == "__main__":
     run_document_agent()
+
+
+
+""" 
+OUTPUT: 
+
+(openAI) (CNNLidar) matteo@pcmatteo:~/Learning_AI/GenAI/08_LangGraph$ python 0.8.11_Drafter.py 
+ 
+ ===== DRAFTER =====
+
+🤖 AI: I have tools available to update or save your document. Please let me know how you'd like to proceed or what content you'd like to update or add.
+
+What would you like to do with the document? Write me a draft email to tell a collegue i can't make it into work today because im sick  
+
+👤 USER: Write me a draft email to tell a collegue i can't make it into work today because im sick
+
+🤖 AI: Here's a draft email for you:
+
+---
+
+Subject: Unable to Attend Work Today
+
+Hi [Colleague's Name],
+
+I hope this message finds you well. I wanted to let you know that I'm not feeling well today and, unfortunately, won't be able to make it into the office. 
+
+I apologize for any inconvenience this may cause and will ensure to catch up on any missed work once I'm feeling better. Please let me know if there's anything urgent that needs my attention today.
+
+Thank you for your understanding.
+
+Best regards,
+
+[Your Name]
+
+--- 
+
+Let me know if you need any changes or if you'd like to save this draft!
+
+What would you like to do with the document? ok mi collegue name is Tom and my name is Matteo 
+
+👤 USER: ok mi collegue name is Tom and my name is Matteo 
+
+🤖 AI: 
+🔧 USING TOOLS: ['update']
+
+🛠️ TOOL RESULT: Document has been updated successfully! The current content is:
+Subject: Unable to Attend Work Today
+
+Hi Tom,
+
+I hope this message finds you well. I wanted to let you know that I'm not feeling well today and, unfortunately, won't be able to make it into the office. 
+
+I apologize for any inconvenience this may cause and will ensure to catch up on any missed work once I'm feeling better. Please let me know if there's anything urgent that needs my attention today.
+
+Thank you for your understanding.
+
+Best regards,
+
+Matteo
+
+What would you like to do with the document? I like it, save it
+
+👤 USER: I like it, save it
+
+🤖 AI: 
+🔧 USING TOOLS: ['save']
+
+🛠️ TOOL RESULT: Document has been updated successfully! The current content is:
+Subject: Unable to Attend Work Today
+
+Hi Tom,
+
+I hope this message finds you well. I wanted to let you know that I'm not feeling well today and, unfortunately, won't be able to make it into the office. 
+
+I apologize for any inconvenience this may cause and will ensure to catch up on any missed work once I'm feeling better. Please let me know if there's anything urgent that needs my attention today.
+
+Thank you for your understanding.
+
+Best regards,
+
+Matteo
+
+💾 Document has been saved to: sick_leave_email_to_Tom.txt
+
+🛠️ TOOL RESULT: Document has been saved successfully to 'sick_leave_email_to_Tom.txt'.
+"""
