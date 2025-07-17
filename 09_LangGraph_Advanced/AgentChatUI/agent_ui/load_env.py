@@ -5,8 +5,7 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-env_name = "UI"  
-env_path = Path("agent_ui") / f"{env_name}.env"
+env_path = Path("agent_ui") / f".env"
 
 # Load dotenv file right away
 load_dotenv(dotenv_path=env_path, override=False)
@@ -18,3 +17,6 @@ def set_if_undefined(var: str):
 # Ensure these are loaded unless already defined
 set_if_undefined("OPENAI_API_KEY")
 set_if_undefined("LANGSMITH_API_KEY")
+set_if_undefined("LANGSMITH_TRACING")
+set_if_undefined("LANGSMITH_ENDPOINT")
+set_if_undefined("LANGSMITH_PROJECT")
