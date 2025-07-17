@@ -12,28 +12,11 @@ from langchain_core.tools import tool, InjectedToolCallId
 from langgraph.prebuilt import InjectedState
 from langgraph.types import Command
 # dataset class
-from state import DatasetState
+# ✅ Correct when agent_ui is installed as a package
+from agent_ui.state import DatasetState
 
 
 DATASET_FOLDER = ".././LLM_data"
-
-def merge_dictionary_entries(existing_dict: Union[dict, None] = None, new_dict: Union[dict, None] = None) -> dict:
-    """
-    Custom reducer to merge dictionary updates:
-    adds keys from new_dict only if they are not already in existing_dict.
-    """
-
-    if not existing_dict:
-        existing_dict = {}
-    if not new_dict:
-        new_dict = {}
-
-    for key, data in new_dict.items():
-        if key not in existing_dict:
-            existing_dict[key] = data
-    
-    return existing_dict
-
 
 # ----------------------
 # Tool: list datasets

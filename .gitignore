@@ -4,3 +4,5 @@ Custom_Chatbot_for_any_website.ipynb
 LangChain/COPY_Interview Question Creator
 LLM_data/
 *.pckl
+*.pyc
+__pycache__

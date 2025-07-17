@@ -3,7 +3,7 @@ from typing import Union, Dict
 from typing_extensions import Annotated
 from langgraph.graph import MessagesState
 
-from tools import merge_dictionary_entries
+from agent_ui.utils import merge_dictionary_entries
 
 class DatasetState(MessagesState):
     loaded: Annotated[Dict[str, Union[pd.DataFrame, gpd.GeoDataFrame]], merge_dictionary_entries]

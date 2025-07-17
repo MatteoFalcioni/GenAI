@@ -1,6 +1,6 @@
 {
   "dependencies": ["."],
   "graphs": {
-    "chat": "./agents.py:graph"
+    "chat": "agent_ui.supervisor:supervisor"
   }
 }
