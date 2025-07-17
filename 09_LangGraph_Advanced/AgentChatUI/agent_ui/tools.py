@@ -16,7 +16,7 @@ from langgraph.types import Command
 from agent_ui.state import DatasetState
 
 
-DATASET_FOLDER = ".././LLM_data"
+DATASET_FOLDER = "../LLM_data"
 
 # ----------------------
 # Tool: list datasets
