@@ -1,7 +1,8 @@
 from langgraph_supervisor import create_supervisor
 from langchain.chat_models import init_chat_model
+
 from agent_ui.state import DatasetState
-from analyst_agent import analyst_agent
+from agent_ui.analyst_agent import analyst_agent
 from agent_ui.load_env import set_if_undefined
 
 set_if_undefined("OPENAI_API_KEY")
