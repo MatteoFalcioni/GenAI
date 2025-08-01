@@ -4,24 +4,22 @@ from analyst import analyst_agent, AgentState
 
 import chainlit as cl
 from langchain.schema.runnable.config import RunnableConfig
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, ToolMessage
 
 supervisor = create_supervisor(
-    model=init_chat_model("openai:gpt-4.1-2025-04-14"),   
+    model=init_chat_model("anthropic:claude-sonnet-4-0"),   
     agents=[analyst_agent],
     prompt=(
-        "You are a supervisor managing a data analyst agent and a RAG agent spcialized in law retrieval. \n"
-        "Assign data-analysis-related tasks to the data analyst\n"
-        "Assign retrieval of laws or articles to the RAG agent.\n"
-        "If the user asks to analize a law, you should first ask the RAG agent to retrieve it, then ask the data_analyst to analize it.\n\n"
-        "Do not call agents in parallel, call one agent at a time."
+        "You are coordinating a data analyst. He can analize data reguarding the city of Bologna\n\n"
+        "Do not do any work yourself.\n"
+        "You must only manage the workflow, greet the user and report what the workers do to the user."
     ),
     state_schema = AgentState,  
     add_handoff_back_messages=True,
     output_mode="full_history"
-).with_config(tags=["main_model"])
+)
 
-graph = supervisor.compile()
+graph = supervisor.compile(name="supervisor")
 
 
 @cl.on_message
@@ -31,8 +29,12 @@ async def on_message(msg: cl.Message):
     final_answer = cl.Message(content="")
     
     for msg, metadata in graph.stream({"messages": [HumanMessage(content=msg.content)]}, stream_mode="messages", config=RunnableConfig(callbacks=[cb], **config)):
-        for msg, metadata in graph.stream({"messages": [HumanMessage(content=msg.content)]}, stream_mode="messages", config=RunnableConfig(callbacks=[cb], **config)):
-            if msg.content:
-                await final_answer.stream_token(msg.content)
+        if (
+            msg.content
+            and not isinstance(msg, HumanMessage)
+            and not isinstance(msg, ToolMessage)
+            and not metadata["langgraph_node"] == "analyst_agent"
+            ):
+            await final_answer.stream_token(msg.content)
 
-        await final_answer.send()
+    await final_answer.send()

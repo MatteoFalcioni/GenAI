@@ -27,6 +27,7 @@ def _set_if_undefined(var: str):
 
 
 _set_if_undefined("OPENAI_API_KEY")
+_set_if_undefined("ANTHROPIC_API_KEY")
 
 
 DATASET_FOLDER = "./LLM_data"
