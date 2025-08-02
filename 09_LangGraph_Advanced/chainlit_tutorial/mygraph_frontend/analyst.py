@@ -6,6 +6,7 @@ import geopandas as gpd
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
+import folium
 import os
 from pathlib import Path
 from typing_extensions import Annotated
@@ -117,10 +118,27 @@ def python_repl_tool(
     fig: Figure | None = None
     if plt.get_fignums():  # returns list of active figure numbers
         fig = plt.gcf()
+
+    # Scan globals and locals for Folium maps (not really working... catches the html but doesn' render it with Text?)
+    ns = {}
+    if hasattr(repl, "globals"):
+        ns.update(repl.globals)
+    if hasattr(repl, "locals"):
+        ns.update(repl.locals)
+    map_obj = next((v for v in ns.values() if isinstance(v, folium.Map)), None)
+    iframe_html = map_obj.get_root()._repr_html_() if map_obj else None
+    if map_obj:
+        iframe_html = map_obj.get_root()._repr_html_()
     
     tool_output = f"Successfully executed:\n```python\n{code}\n```\nStdout: {result}"
-    tool_artifact = {"type": "image", "img_data" : fig}
-    return Command(update={"messages": [ToolMessage(content=tool_output, artifact=tool_artifact, tool_call_id=tool_call_id)]})
+
+    artifacts = {}
+    if fig is not None:
+        artifacts["image"] = fig
+    if iframe_html is not None:
+        artifacts["html"] = iframe_html
+
+    return Command(update={"messages": [ToolMessage(content=tool_output, artifact=artifacts, tool_call_id=tool_call_id)]})
 
 
 # ----------------------

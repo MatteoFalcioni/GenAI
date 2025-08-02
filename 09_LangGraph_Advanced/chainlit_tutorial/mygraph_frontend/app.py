@@ -8,6 +8,27 @@ import chainlit as cl
 from langchain.schema.runnable.config import RunnableConfig
 from langchain_core.messages import HumanMessage, ToolMessage, AIMessage
 
+
+def build_iframe(html: str, height: int = 600) -> str:
+    """Return an iframe snippet with the folium HTML embedded via srcdoc."""
+    import html as html_lib  # for escaping quotes
+    quoted = html_lib.escape(html, quote=True)
+    return (
+        f'<iframe srcdoc="{quoted}" '
+        f'style="width:100%; height:{height}px; border:none;"></iframe>'
+    )
+
+from chainlit import Text, Message
+
+def send_map(html_page: str):
+    iframe_snippet = build_iframe(html_page)
+    return Message(
+        content="🗺️ Interactive map:",
+        elements=[ Text(name="map-iframe",
+                        content=iframe_snippet,
+                        display="inline") ]
+    )
+
 supervisor = create_supervisor(
     model=init_chat_model("anthropic:claude-sonnet-4-0"),   
     agents=[analyst_agent],
@@ -24,10 +45,10 @@ supervisor = create_supervisor(
 graph = supervisor.compile(name="supervisor")
 
 
-'''@cl.on_chat_start
+@cl.on_chat_start
 async def on_chat_start():
     print("Session started")
-    await cl.Message("Welcome to BoloChat! How can I help you?").send()'''
+    await cl.Message("Welcome to BoloChat! What would you like to do today?").send()
 
 
 @cl.on_chat_end
@@ -62,13 +83,25 @@ async def on_message(msg: cl.Message):
                     type="tool"
                 ).send()
             else:
-                fig = chunk.artifact.get("img_data")
-                if fig:
+                fig = chunk.artifact.get("image")
+                html = chunk.artifact.get("html")
+
+                # working
+                '''if fig:
                     await cl.Message(
                         content="Here's the generated plot:",
-                        elements=[cl.Pyplot(name="plot", figure=fig, display="inline")]
-                    ).send()
+                        elements=[cl.Pyplot(name="plot", figure=fig, display="inline", size="large")]
+                    ).send()'''
+                if html:    # not working
+                    print("html detected!")
+                    iframe = (
+                        '<iframe srcdoc="' + html.escape(html, quote=True) +
+                        '" style="width:100%;height:600px;border:none;"></iframe>'
+                    )
+
+                    await cl.Message(content=f"🗺️ Interactive map:\n\n{iframe}").send()
 
 
+# also: if it detects fig AND html it shows a figure. Why?  
 
 # https://www.datacamp.com/tutorial/chainlit
