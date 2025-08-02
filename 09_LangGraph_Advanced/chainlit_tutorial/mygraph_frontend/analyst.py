@@ -4,6 +4,8 @@ from langgraph.prebuilt import InjectedState
 from langchain_core.messages import ToolMessage
 import geopandas as gpd
 import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 import os
 from pathlib import Path
 from typing_extensions import Annotated
@@ -111,8 +113,14 @@ def python_repl_tool(
         tool_err_1 = f"Failed to execute. Error: {repr(e)}"
         return Command(update={"messages": [ToolMessage(content=tool_err_1, tool_call_id=tool_call_id)]})
     
+    # Check if a figure was created
+    fig: Figure | None = None
+    if plt.get_fignums():  # returns list of active figure numbers
+        fig = plt.gcf()
+    
     tool_output = f"Successfully executed:\n```python\n{code}\n```\nStdout: {result}"
-    return Command(update={"messages": [ToolMessage(content=tool_output, tool_call_id=tool_call_id)]})
+    tool_artifact = {"type": "image", "img_data" : fig}
+    return Command(update={"messages": [ToolMessage(content=tool_output, artifact=tool_artifact, tool_call_id=tool_call_id)]})
 
 
 # ----------------------
@@ -314,13 +322,12 @@ analyst_suffix = (
     "-------\n"
     "**Visualization**\n"
     "If visualization is requested, you must:\n"
-    "   - Use the `python_repl_tool` to create **one clear, interpretable figure**, based on the request.\n"
-    "   - display the visualization exactly ONCE using .show(), if possible.\n"
-    "   - save the output figure to the `SAVING_DIRECTORY` folder, i.e. `./visualizer_outputs/`, after displaying it.\n"
+    "   - Use the `python_repl_tool` to create **one clear, interpretable figure**, based on the request. DO NOT show the figure with .show().\n"
+    "   - save the output figure to the `SAVING_DIRECTORY` folder, i.e. `./visualizer_outputs/`.\n"
     "Always aim to produce visually appealing plots. Your visualizations should be easy to interpret and presentation-ready."
     "\nDefault visualization preferences:\n"
     "- Use line plots, bar charts, or scatter plots for tabular data.\n"
-    "- For geospatial data, use `.explore()` or overlay plots via geopandas or folium.\n\n"
+    "- For geospatial data, use `.explore()` or overlay plots via geopandas or folium to produce html maps.\n\n"
 )
 
 from langgraph.prebuilt import create_react_agent

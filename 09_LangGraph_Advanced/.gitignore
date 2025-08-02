@@ -1,2 +1,4 @@
 *.json
 .chainlit
+*.png
+*.html
