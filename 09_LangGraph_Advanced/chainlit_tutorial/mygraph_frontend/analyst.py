@@ -343,7 +343,7 @@ analyst_suffix = (
     "Always aim to produce visually appealing plots. Your visualizations should be easy to interpret and presentation-ready."
     "\nDefault visualization preferences:\n"
     "- Use line plots, bar charts, or scatter plots for tabular data.\n"
-    "- For geospatial data, use `.explore()` or overlay plots via geopandas or folium to produce html maps.\n\n"
+    "- For geospatial data, use Folium to produce html maps.\n\n"
 )
 
 from langgraph.prebuilt import create_react_agent

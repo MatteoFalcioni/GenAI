@@ -11,6 +11,8 @@ from langchain_core.messages import HumanMessage, ToolMessage, AIMessage
 from pathlib import Path
 
 
+# helper functions to get last html and last png from outputs folder
+
 def get_html(folder = "./visualizer_outputs"):
     folder = Path(folder)          # or wherever you save them
     html_files = sorted(folder.glob("*.html"),
@@ -23,7 +25,18 @@ def get_html(folder = "./visualizer_outputs"):
 
     return html
 
+def get_img(folder="./visualizer_outputs"):
+    folder = Path(folder)
+    png_files = sorted(folder.glob("*.png"),
+                       key=lambda p: p.stat().st_mtime,
+                       reverse=True)
+    if not png_files:
+        return "No PNG file found"
 
+    return str(png_files[0])
+
+
+# build graph with create_supervisor()
 supervisor = create_supervisor(
     model=init_chat_model("anthropic:claude-sonnet-4-0"),   
     agents=[analyst_agent],
@@ -37,6 +50,7 @@ supervisor = create_supervisor(
     output_mode="full_history"
 )
 
+# compile graph
 graph = supervisor.compile(name="supervisor")
 
 
@@ -55,12 +69,14 @@ async def on_chat_end():
 async def on_message(msg: cl.Message):
     matplotlib.use("Agg")   # this should stop displaying with .show()
 
-    config = {"configurable": {"thread_id": cl.context.session.id}}
+    config = {"configurable": {"thread_id": cl.context.session.id}, "recursion_limit" : 35}
     cb = cl.LangchainCallbackHandler()
 
     await cl.Message(content="Thinking...").send()
     
     async for chunk, metadata in graph.astream({"messages": [HumanMessage(content=msg.content)]}, stream_mode="messages", config=RunnableConfig(callbacks=[cb], **config)):
+
+        # problem: all images in a run are still in memory. If i ask for another plot, the previous one will be shown as well.   
         if (
             chunk.content
             and isinstance(chunk, AIMessage)
@@ -70,7 +86,8 @@ async def on_message(msg: cl.Message):
             await cl.Message(content=text, author="supervisor").send()
 
         elif isinstance(chunk, ToolMessage) and metadata["langgraph_node"] == "analyst_agent":
-            if not chunk.artifact:
+            
+            '''if not chunk.artifact:
                 tool_output = chunk.content
                 # tool_name = chunk.name
                 await cl.Message(
@@ -78,21 +95,31 @@ async def on_message(msg: cl.Message):
                     author="tool",
                     type="tool"
                 ).send()
-            else:
+            else:'''
+
+            # workarounds: streaming toolmessages as chunks conflicts with how i save images in toolmessages (i get same image / same html printed many times)
+            # so i get the last png from folder instead. But if the model doesn't save it we're fucked, so fix this
+            if chunk.artifact:
+                
                 fig = chunk.artifact.get("image")
                 html = chunk.artifact.get("html")
 
-                # working
                 if fig:
+                    print("image detected")
+
+                    last_img_path = get_img()
+                    image = cl.Image(path=last_img_path, name="Generated Plot", display="inline", size="large")
+
                     await cl.Message(
-                        content="Here's the generated plot:",
-                        elements=[cl.Pyplot(name="plot", figure=fig, display="inline", size="large")]
+                        content="Generated plot:",
+                        elements=[image]
                     ).send()
-                if html:    # not working
+
+                if html:    
                     print("html detected!")
 
                     #retrieve last produced html 
-                    last_html = get_html()
+                    last_html = get_html()  # limited: only gets the last html from folder
 
                     await cl.Message(
                         content="Interactive map:",
