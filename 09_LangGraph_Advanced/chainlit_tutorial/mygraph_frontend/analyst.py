@@ -119,10 +119,8 @@ def python_repl_tool(
     if plt.get_fignums():  # returns list of active figure numbers
         fig = plt.gcf()
 
-    # Scan globals and locals for Folium maps (not really working... catches the html but doesn' render it with Text?)
+    # Scan globals and locals for Folium maps 
     ns = {}
-    if hasattr(repl, "globals"):
-        ns.update(repl.globals)
     if hasattr(repl, "locals"):
         ns.update(repl.locals)
     map_obj = next((v for v in ns.values() if isinstance(v, folium.Map)), None)
